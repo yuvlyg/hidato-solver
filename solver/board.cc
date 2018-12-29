@@ -9,6 +9,7 @@
 #define EMPTY (0)
 #define abs(x) ((x) >= 0 ? (x) : -1*(x))
 
+
 using namespace std;
 
 bool isValidCoor(int x, int y){
@@ -54,9 +55,22 @@ Board::Board(const char* filename){
     FILE* input_file = fopen(filename, "r");
     if (input_file){
         while (fscanf(input_file, "%d %d %d", &x, &y, &val) != EOF){
-            if (isValidCoor(x, y) && (val >= 1) && (val <= 61)){
+            if (isValidCoor(x, y) && (val >= 1) && (val <= N_CELLS)){
                 m_board[x][y] = val;
             }
+        }
+    }
+}
+
+Board::Board(const int vec[N_CELLS * 3]){
+    int x, y, val;
+    putZeros();
+    for (size_t i = 0; i < N_CELLS * 3; i += 3){
+        x = vec[i];
+        y = vec[i + 1];
+        val = vec[i + 2];
+        if (isValidCoor(x, y)){
+            m_board[x][y] = val;
         }
     }
 }
@@ -75,6 +89,21 @@ bool Board::writeToFile(const char* filename) const{
     }
     return false;
 }
+
+void Board::toVec(int vec[N_CELLS * 3]) const{
+    size_t p = 0;
+    for (size_t i = 0; i < 9; i++){
+        for (size_t j = 0; j < 9; j++){
+            if (isValidCoor(i, j)){
+                vec[p] = i;
+                vec[p + 1] = j;
+                vec[p + 2] = m_board[i][j];
+                p += 3;
+            }
+        }
+    }
+}
+
 void Board::putZeros(){
     for (size_t i = 0; i < 9; i++){
         for (size_t j = 0; j < 9; j++){
@@ -121,7 +150,7 @@ bool Board::isLegalState() const {
     }
     
     // make sure none repeats
-    for (size_t i = 1; i <= 61; i++){
+    for (size_t i = 1; i <= N_CELLS; i++){
         if (seen[i] > 1){
             //cout << "failed on repeats" << endl;
             return false;
@@ -133,7 +162,7 @@ bool Board::isLegalState() const {
         for (int y = 0; y < 9; y++){
             if (isValidCoor(x, y) && (m_board[x][y] != EMPTY)){
                 element = m_board[x][y];
-                possible_neighbors = (element == 1) || (element == 61) ? 1 : 2;
+                possible_neighbors = (element == 1) || (element == N_CELLS) ? 1 : 2;
                 
                 neighbors_good = 0;
                 neighbors_empty = 0;
@@ -150,7 +179,7 @@ bool Board::isLegalState() const {
                 }
                 
                 // the number of consecutive elements on board != this number among neighbours 
-                if (neighbors_good != ((element == 1) ? 0 : seen[element - 1]) + ((element == 61) ? 0 : seen[element + 1])){
+                if (neighbors_good != ((element == 1) ? 0 : seen[element - 1]) + ((element == N_CELLS) ? 0 : seen[element + 1])){
                     //cout << "failed on far consecutive element" << endl;
                     return false;
                 }

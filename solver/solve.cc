@@ -91,6 +91,17 @@ bool solveInplace(Board& b, int hint=-1){
     return false;
 }
 
+bool solveFromVec(int vec[N_CELLS * 3]){
+    bool res;
+    Board b(vec);
+    b.printBoard();
+    res = solveInplace(b);
+    if (res){
+        b.toVec(vec);
+    }
+    return res;
+}
+
 int main(int argc, char** argv){
     bool res;
     if (argc == 1){
